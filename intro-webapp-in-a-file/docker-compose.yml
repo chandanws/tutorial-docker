@@ -1,8 +1,19 @@
+# docker-compose doc: https://docs.docker.com/v1.12/compose/compose-file/
 version: '3'
 services:
   wordpress:
+    # image doc: https://hub.docker.com/_/mysql/
     image: wordpress:4.7.4
+    container_name: wp
     links:
     - database
+    # container port 80 exposed as 8080 to the machine
+    ports:
+      - 8080:80
   database:
+    # image doc: https://hub.docker.com/_/mysql/
     image: mysql:5.7.18
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: wordpress

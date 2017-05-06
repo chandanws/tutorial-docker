@@ -1,15 +1,10 @@
+# This is an example of how to combine three containers to provide
+# a clean yet working Wordpress instance.
 # docker-compose doc: https://docs.docker.com/v1.12/compose/compose-file/
 version: '3'
 services:
-  wordpress:
-    # image doc: https://hub.docker.com/_/mysql/
-    image: wordpress:4.7.4
-    container_name: wp
-    links:
-    - database
-    # container port 80 exposed as 8080 to the machine
-    ports:
-      - 8080:80
+
+  # The database wordpress will store data to.
   database:
     # image doc: https://hub.docker.com/_/mysql/
     image: mysql:5.7.18
@@ -17,3 +12,51 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: rootpwd
       MYSQL_DATABASE: wordpress
+
+  # Wordpress running in a PHP enabled web server.
+  wordpress:
+    # image doc: https://hub.docker.com/_/wordpress/
+    # Exposes port 80
+    image: wordpress:4.7.4
+    container_name: wp
+    depends_on:
+      - database
+    environment:
+      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: rootpwd
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_TABLE_PREFIX: wp_
+
+  # Let's Encrypt enabled container acting as HTTPS reverse proxy
+  https:
+    image: annixa/docker-nginx-letsencrypt-proxy
+    container_name: https
+    depends_on:
+      - wordpress
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      # LE_EMAIL, the email address for use with Let's Encrypt (simply registers your public key for retrieval).
+      LE_EMAIL: user@yopmail.com
+      # LE_DOMAIN, a comma separated list of domains current configured to point at your server
+      LE_DOMAIN: localhost
+      # PROXY_DEST, a comma separated list of destinations for the proxied services;
+      # along the lines of http://mydestination.com or http://localhost:8000.
+      # There should be as many destinations as LE_DOMAINs;
+      # however, for each without a corresponding destination,
+      # the first destination will be used for the remaining LE_DOMAINs.
+      PROXY_DEST: http://wordpress:80
+      # LE_ENABLED (optional, defaults to true),
+      # For local, non-public development stacks, set to false.
+      # This will disable requests to Let's Encrypt for certificates
+      # and use self signed certificates instead.
+      LE_ENABLED: "false"
+      # LE_TEST (optional), LE is rate limited.
+      # While testing your stack, be sure to set testing mode so requests don't count
+      # against your domain quota. Such certificates will not be valid,
+      # but are sufficient to test your setup.
+      # See https://community.letsencrypt.org/t/rate-limits-for-lets-encrypt/6769 for more information.
+      LE_TEST: "false"
+      TLS_SETTING: MODERN

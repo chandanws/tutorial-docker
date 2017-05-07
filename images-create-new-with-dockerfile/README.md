@@ -1,11 +1,24 @@
 Images
 ======
 
-Let's see how is it possible to create a new image with a Dockerfile.
+Let's see how is it possible to create a new image with the two main
+workflows provided by Docker:
+* with `docker commit` command;
+* with a `Dockerfile`.
 
 ## Exercises
 
-### An ubuntu:16.04 with netcat available
+## Exercises
+
+### An _ubuntu:16.04_ With Netcat Using Docker Commit
+
+_OPS! Ubuntu 16:04 does not have a netcat installed!_
+
+We are going to create such image.
+
+### An _ubuntu:16.04_ With Netcat Available Using a Dockerfile
+
+_OPS! Ubuntu 16:04 does not have a netcat installed!_
 
 Let's prepare a Dockerfile.
 
